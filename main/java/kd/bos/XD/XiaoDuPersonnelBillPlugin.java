@@ -2,7 +2,6 @@ package kd.bos.XD;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import kd.bos.dataentity.utils.StringUtils;
-import kd.bos.entity.datamodel.IDataModel;
 import kd.bos.form.ClientProperties;
 import kd.bos.form.control.AttachmentPanel;
 import kd.bos.form.control.events.ItemClickEvent;

@@ -1,6 +1,7 @@
 package kd.bos.XD;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
+import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.utils.StringUtils;
 import kd.bos.form.ClientProperties;
 import kd.bos.form.control.AttachmentPanel;
@@ -29,14 +30,19 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
 
     @Override
     public void afterBindData(EventObject e) {
+        //自动带出申请人所在公司
         super.afterBindData(e);
-        long currentUserId = UserServiceHelper.getCurrentUserId();
-        List<Long> userIds = new ArrayList<>(1);
-        userIds.add(currentUserId);
-        Map<Long, Long> companyMap = UserServiceHelper.getCompanyByUserIds(userIds);
-        this.getModel().setValue("wmq_company", companyMap.get(currentUserId));
 
-
+        DynamicObject wmq_company = (DynamicObject) this.getView().getModel().getValue("wmq_company");
+        if (wmq_company != null) {
+            this.getModel().setValue("wmq_company", wmq_company.get("id"));
+        } else {
+            long currentUserId = UserServiceHelper.getCurrentUserId();
+            List<Long> userIds = new ArrayList<>(1);
+            userIds.add(currentUserId);
+            Map<Long, Long> companyMap = UserServiceHelper.getCompanyByUserIds(userIds);
+            this.getModel().setValue("wmq_company", companyMap.get(currentUserId));
+        }
     }
 
     /**
@@ -47,31 +53,31 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
     @Override
     public void beforeBindData(EventObject e) {
         super.beforeBindData(e);
-        Object source = e.getSource();
         Object billstatus = this.getModel().getValue("billstatus");
-        if ("B".equals(billstatus)) {
-            //修改文本字段元数据
-            HashMap<String, Object> fieldMap = new HashMap<>();
-            //设置前景色
-            fieldMap.put(ClientProperties.ForeColor, "red");
-            //同步指定元数据到按钮控件
-            this.getView().updateControlMetadata("billstatus", fieldMap);
-        } else if ("A".equals(billstatus)) {
-            //修改文本字段元数据
-            HashMap<String, Object> fieldMap = new HashMap<>();
+        HashMap<String, Object> fieldMap = new HashMap<>();
+        if ("A".equals(billstatus)) {
             //设置前景色
             fieldMap.put(ClientProperties.ForeColor, "black");
-            //同步指定元数据到按钮控件
-            this.getView().updateControlMetadata("billstatus", fieldMap);
+        } else if ("B".equals(billstatus)) {
+            //设置前景色
+            fieldMap.put(ClientProperties.ForeColor, "orange");
+        } else if ("C".equals(billstatus)) {
+            //设置前景色
+            fieldMap.put(ClientProperties.ForeColor, "green");
+        } else if ("E".equals(billstatus)) {
+            //设置前景色
+            fieldMap.put(ClientProperties.ForeColor, "red");
         }
+        //同步指定元数据到按钮控件
+        this.getView().updateControlMetadata("billstatus", fieldMap);
     }
 
     @Override
     public void itemClick(ItemClickEvent evt) {
         super.itemClick(evt);
-        if (StringUtils.equals("bar_submit", evt.getItemKey()) || StringUtils.equals("wmq_baritemap1", evt.getItemKey())) {
-            this.getView().updateView();
-        }
+//        if (StringUtils.equals("bar_submit", evt.getItemKey()) || StringUtils.equals("wmq_baritemap1", evt.getItemKey())) {
+//            this.getView().updateView();
+//        }
     }
 
     @Override

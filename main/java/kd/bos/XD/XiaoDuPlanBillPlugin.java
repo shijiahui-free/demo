@@ -138,12 +138,14 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
                 clone.set("wmq_version", version); // 更新：版本号 + 1
                 clone.set("wmq_versionstatus", "A");//新方案的版本状态为最新版本
 
-                DynamicObject[] dynamicObjects = new DynamicObject[]{clone};
-                OperationResult saveOperate = SaveServiceHelper.saveOperate("wmq_xiaodu_plan", dynamicObjects, OperateOption.create());
-                if (saveOperate.isSuccess()) {
-                    wmq_xiaodu_plan.set("wmq_versionstatus", "B");
-                    SaveServiceHelper.update(wmq_xiaodu_plan);
-                }
+
+               OperationResult saveOperate = SaveServiceHelper.saveOperate("wmq_xiaodu_plan", new DynamicObject[]{clone}, OperateOption.create());
+
+                //SaveServiceHelper.save(new DynamicObject[]{clone});
+//                if (saveOperate.isSuccess()) {
+//                    wmq_xiaodu_plan.set("wmq_versionstatus", "B");
+//                    SaveServiceHelper.update(wmq_xiaodu_plan);
+//                }
             }
         }
     }

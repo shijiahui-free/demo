@@ -10,7 +10,9 @@ import kd.bos.entity.botp.plugin.args.AfterConvertEventArgs;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
+import kd.bos.servicehelper.operation.SaveServiceHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,14 +40,15 @@ public class XiaoduPersonToNotes extends AbstractConvertPlugIn {
     @Override
     public void afterConvert(AfterConvertEventArgs e) {
         this.printEventInfo("afterConvert", "");
-        BillEntityType srcMainType = this.getSrcMainType();
         ExtendedDataEntitySet targetExtDataEntitySet = e.getTargetExtDataEntitySet();
         Map<String, List<ExtendedDataEntity>> extDataEntityMap = targetExtDataEntitySet.getExtDataEntityMap();
         List<ExtendedDataEntity> wmq_xiaodu_notes = extDataEntityMap.get("wmq_xiaodu_notes");
+
         if (wmq_xiaodu_notes.size() > 0) {
             ExtendedDataEntity extendedDataEntity = wmq_xiaodu_notes.get(0);
             //获取目标单（消毒记录单）
             DynamicObject xiaoDuNote = extendedDataEntity.getDataEntity();
+            // 车间ID
             String id = xiaoDuNote.get("wmq_applytoworkshop.id").toString();
             //查询消毒方案
             QFilter qFilter = new QFilter("useorg,id", QCP.equals, id);
@@ -86,8 +89,17 @@ public class XiaoduPersonToNotes extends AbstractConvertPlugIn {
                         rdEntity.add(obj);
                     }
                 }
-                //将分录数据赋值回消毒记录单
-                xiaoDuNote.set("wmq_step_entryentity", rdEntity);
+
+                //人员申请单的单据状态变成消毒中。
+
+                //开始消毒成功后，对应员工申请单状态为进行中
+                String applyid = xiaoDuNote.get("wmq_applyno").toString();   //消毒记录单转化时记录人员申请单申请单号
+                List<QFilter> searchFilterList2 = new ArrayList<>();
+                searchFilterList2.add(new QFilter("billno", "=", applyid));
+                DynamicObject dot2 = BusinessDataServiceHelper.loadSingle("wmq_personnel", "billstatus,billno",
+                        searchFilterList2.toArray(new QFilter[]{}));
+                dot2.set("billstatus", "D");//消毒中
+                SaveServiceHelper.update(dot2);
             }
         }
     }

@@ -3,6 +3,8 @@ package kd.bos.XD;
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.utils.StringUtils;
+import kd.bos.entity.datamodel.IDataModel;
+import kd.bos.entity.datamodel.events.PropertyChangedArgs;
 import kd.bos.form.ClientProperties;
 import kd.bos.form.control.AttachmentPanel;
 import kd.bos.form.control.events.ItemClickEvent;
@@ -10,12 +12,16 @@ import kd.bos.form.events.BeforeDoOperationEventArgs;
 import kd.bos.form.operate.FormOperate;
 import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.form.plugin.IFormPlugin;
+import kd.bos.orm.query.QCP;
+import kd.bos.orm.query.QFilter;
+import kd.bos.servicehelper.QueryServiceHelper;
+import kd.bos.servicehelper.TimeServiceHelper;
 import kd.bos.servicehelper.user.UserServiceHelper;
 
 import java.util.*;
 
 /**
- * 人员关系插件
+ * 人员申请单插件
  *
  * @author sjh
  * on 2023/2/27
@@ -73,11 +79,32 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
     }
 
     @Override
-    public void itemClick(ItemClickEvent evt) {
-        super.itemClick(evt);
-//        if (StringUtils.equals("bar_submit", evt.getItemKey()) || StringUtils.equals("wmq_baritemap1", evt.getItemKey())) {
-//            this.getView().updateView();
-//        }
+    public void propertyChanged(PropertyChangedArgs e) {
+        super.propertyChanged(e);
+        //获取表单数据包--申请进入车间（wmq_applytoworkshop）
+        DynamicObject object = (DynamicObject) this.getModel().getDataEntity().get("wmq_applytoworkshop");
+        if (object == null) {
+            return;
+        }
+
+        //获取值改变字段的标识
+        String name = e.getProperty().getName();
+        //同时设置具有相同含义的QFilter条件，用于选单数据查询
+        QFilter qFilter = new QFilter("useorg.id", QCP.equals, object.getPkValue());
+
+        switch (name) {
+            case "wmq_applytoworkshop":
+                DynamicObject queryOne = QueryServiceHelper.queryOne("wmq_xiaodu_plan", "id", new QFilter[]{qFilter});
+                if (queryOne == null) {
+                    this.getView().showTipNotification("该车间没有消毒方案,请重新选择");
+                    this.getModel().setValue("wmq_applytoworkshop", null);
+                    break;
+                }
+                this.getModel().setValue("wmq_xdfa", queryOne.getLong("id"));
+                break;
+            default:
+                break;
+        }
     }
 
     @Override

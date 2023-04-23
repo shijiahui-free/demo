@@ -2,6 +2,7 @@ package kd.bos.XD;
 
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
+import kd.bos.db.DB;
 import kd.bos.entity.BillEntityType;
 import kd.bos.entity.ExtendedDataEntity;
 import kd.bos.entity.ExtendedDataEntitySet;
@@ -9,6 +10,7 @@ import kd.bos.entity.botp.plugin.AbstractConvertPlugIn;
 import kd.bos.entity.botp.plugin.args.AfterConvertEventArgs;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
+import kd.bos.servicehelper.AttachmentServiceHelper;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
 
@@ -35,7 +37,7 @@ public class XiaoduPersonToNotes extends AbstractConvertPlugIn {
      * 单据转换后事件，最后执行
      *
      * @param e
-     * @remark 插件可以在这个事件中，对生成的目标单数据，进行最后的修改
+     * @remark 事件在目标单据生成完毕后触发，插件可以在这个事件对生成的目标单数据进行最后的调整
      */
     @Override
     public void afterConvert(AfterConvertEventArgs e) {
@@ -48,10 +50,10 @@ public class XiaoduPersonToNotes extends AbstractConvertPlugIn {
             ExtendedDataEntity extendedDataEntity = wmq_xiaodu_notes.get(0);
             //获取目标单（消毒记录单）
             DynamicObject xiaoDuNote = extendedDataEntity.getDataEntity();
-            // 车间ID
-            String id = xiaoDuNote.get("wmq_applytoworkshop.id").toString();
+            //车间ID
+            String chejianId = xiaoDuNote.get("wmq_applytoworkshop.id").toString();
             //查询消毒方案
-            QFilter qFilter = new QFilter("useorg,id", QCP.equals, id);
+            QFilter qFilter = new QFilter("useorg,id", QCP.equals, chejianId);
             DynamicObject wmq_xiaodu_plans = BusinessDataServiceHelper.loadSingle("wmq_xiaodu_plan", "id,number,name", qFilter.toArray());
             DynamicObject rtdl_ds = BusinessDataServiceHelper.loadSingle(wmq_xiaodu_plans.getPkValue(), "wmq_xiaodu_plan");
             //设置消毒方案到消毒记录单中
@@ -90,8 +92,16 @@ public class XiaoduPersonToNotes extends AbstractConvertPlugIn {
                     }
                 }
 
-                //人员申请单的单据状态变成消毒中。
+                //上游附件下推携带到下游附件
+                List<DynamicObject> convertSource = (List<DynamicObject>) extendedDataEntity.getValue("ConvertSource");
+                for (DynamicObject dynamicObject : convertSource) {
+                    long sourceId = dynamicObject.getLong("id");
+                    List<Map<String, Object>> attachments = AttachmentServiceHelper.getAttachments("wmq_personnel", sourceId, "attachmentpanel");
+                    AttachmentUntil.uploadTargetAttachments("wmq_xiaodu_notes", xiaoDuNote.getPkValue(), "attachmentpanel", attachments);
+                }
 
+
+                //人员申请单的单据状态变成消毒中。
                 //开始消毒成功后，对应员工申请单状态为进行中
                 String applyid = xiaoDuNote.get("wmq_applyno").toString();   //消毒记录单转化时记录人员申请单申请单号
                 List<QFilter> searchFilterList2 = new ArrayList<>();

@@ -4,6 +4,10 @@ import com.kingdee.bos.util.backport.Arrays;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.entity.LocaleString;
+import kd.bos.db.DB;
+import kd.bos.entity.ExtendedDataEntity;
+import kd.bos.entity.ExtendedDataEntitySet;
+import kd.bos.entity.botp.plugin.args.AfterConvertEventArgs;
 import kd.bos.entity.datamodel.IDataModel;
 import kd.bos.entity.datamodel.events.BizDataEventArgs;
 import kd.bos.form.container.Wizard;
@@ -18,6 +22,7 @@ import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.mvc.bill.BillView;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
+import kd.bos.servicehelper.AttachmentServiceHelper;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.QueryServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
@@ -40,6 +45,10 @@ public class XDRecordFormPlugin extends AbstractFormPlugin implements WizardStep
         wizard.addWizardStepsListener(this);
     }
 
+    /**
+     * @param evt 插件可以在此事件，进行数据校验，取消后续处理。
+     *            用户点击文本字段的按钮时，触发此事件。
+     */
     @Override
     public void beforeClick(BeforeClickEvent evt) {
         super.beforeClick(evt);
@@ -73,6 +82,7 @@ public class XDRecordFormPlugin extends AbstractFormPlugin implements WizardStep
                 if (ifEndFlag) {
                     //所有步骤全部完成，则 都整单完成(提交)
                     this.getModel().setValue("billstatus", "B");
+                    this.getModel().setValue("wmq_datestatus", "B");
                     this.getView().invokeOperation("save");
                 }
                 this.getView().updateView();
@@ -93,13 +103,10 @@ public class XDRecordFormPlugin extends AbstractFormPlugin implements WizardStep
         if (noteExist == null) {
             //分录初始化
             noteEntityInitialize();
-            //消毒记录向导--初始化
-            DynamicObjectCollection wmq_step_entryentity = this.getModel().getEntryEntity("wmq_step_entryentity");
-            wizardInitialize(wmq_step_entryentity);
-        } else {
-            DynamicObjectCollection step_entryentity = this.getModel().getEntryEntity("wmq_step_entryentity");
-            wizardInitialize(step_entryentity);
         }
+        //消毒记录向导--初始化
+        DynamicObjectCollection wmq_step_entryentity = this.getModel().getEntryEntity("wmq_step_entryentity");
+        wizardInitialize(wmq_step_entryentity);
     }
 
     @Override

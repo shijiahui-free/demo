@@ -10,10 +10,12 @@ import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.form.*;
 import kd.bos.form.control.EntryGrid;
 import kd.bos.form.control.events.ItemClickEvent;
+import kd.bos.form.events.BeforeDoOperationEventArgs;
 import kd.bos.form.events.ClosedCallBackEvent;
 import kd.bos.form.field.BasedataEdit;
 import kd.bos.form.field.events.BeforeF7SelectEvent;
 import kd.bos.form.field.events.BeforeF7SelectListener;
+import kd.bos.form.operate.FormOperate;
 import kd.bos.list.ListShowParameter;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
@@ -94,9 +96,9 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
 
         int a = this.getModel().getEntryEntity("wmq_leveentry") == null ? 0 : this.getModel().getEntryEntity("wmq_leveentry").size();
         if (a == 0) {
-            this.getModel().batchCreateNewEntryRow("wmq_leveentry", xiaoduLevels.length);//批量新建行
-            // 循环所有的物料
-            for (int i = 0; i < xiaoduLevels.length; i++) {
+            int[] wmq_leveentries = this.getModel().batchCreateNewEntryRow("wmq_leveentry", xiaoduLevels.length);//批量新建行
+            // 循环所有可用的等级基础资料
+            for (int i = 0; i < wmq_leveentries.length; i++) {
                 this.getModel().setValue("wmq_xdlevel", xiaoduLevels[i].get("id"), i);
             }
         }
@@ -114,12 +116,49 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
                 .invokeControlMethod(clientViewProxy, entryGrid.getKey());
     }
 
-    @Override
-    public void itemClick(ItemClickEvent evt) {
-        super.itemClick(evt);
+//    @Override
+//    public void itemClick(ItemClickEvent evt) {
+//        super.itemClick(evt);
+//
+//        String itemKey = evt.getItemKey(); //点击的工具栏按钮标识
+//        if ("bar_save".equals(itemKey)) {
+//            // 1.新增时首次发布，发布后版本状态为最新版本，版本号为1
+//            // 2.再次修改发布时，最新版本的方案才能发布；
+//            // 如果消毒方案没有被消毒记录单引用过，则保存修改，
+//            // 如果已经产生过消毒记录单，则发布后另存为一个新方案，版本状态为最新版本，版本号+1，旧方案版本状态为历史版本。
+//
+//            // 查询消毒记录单是否引用过此消毒方案
+//            List<QFilter> searchFilterList = new ArrayList<>();
+//            searchFilterList.add(new QFilter("wmq_xiaodu_plan.number", QCP.equals, this.getModel().getValue("number")));
+//            DynamicObject dots = BusinessDataServiceHelper.loadSingle("wmq_xiaodu_notes", "id, billno", searchFilterList.toArray(new QFilter[]{}));
+//            if (dots == null) { // 没有被引用过
+//                this.getView().updateView();
+//            } else {
+//                DynamicObject wmq_xiaodu_plan = this.getModel().getDataEntity(true);
+//                DynamicObject clone = (DynamicObject) new CloneUtils(true, true).clone(wmq_xiaodu_plan);
+//                int version = (int) this.getModel().getValue("wmq_version") + 1;
+//                clone.set("wmq_version", version); // 更新：版本号 + 1
+//                clone.set("wmq_versionstatus", "A");//新方案的版本状态为最新版本
+//
+//
+//                //OperationResult saveOperate = SaveServiceHelper.saveOperate("wmq_xiaodu_plan", new DynamicObject[]{clone}, OperateOption.create());
+////                if (saveOperate.isSuccess()) {
+////                    wmq_xiaodu_plan.set("wmq_versionstatus", "B");
+////                    SaveServiceHelper.update(wmq_xiaodu_plan);
+////                }
+//                //SaveServiceHelper.save(new DynamicObject[]{clone}, OperateOption.create());
+//            }
+//        }
+//    }
 
-        String itemKey = evt.getItemKey(); //点击的工具栏按钮标识
-        if ("bar_save".equals(itemKey)) {
+    /**
+     * @param args 用户点击按钮、菜单，执行绑定的操作逻辑前，触发此事件；
+     */
+    @Override
+    public void beforeDoOperation(BeforeDoOperationEventArgs args) {
+        super.beforeDoOperation(args);
+        FormOperate formOperate = (FormOperate) args.getSource();
+        if (StringUtils.equals("save", formOperate.getOperateKey())) {
             // 1.新增时首次发布，发布后版本状态为最新版本，版本号为1
             // 2.再次修改发布时，最新版本的方案才能发布；
             // 如果消毒方案没有被消毒记录单引用过，则保存修改，
@@ -133,23 +172,32 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
                 this.getView().updateView();
             } else {
                 DynamicObject wmq_xiaodu_plan = this.getModel().getDataEntity(true);
+                //克隆新对象
                 DynamicObject clone = (DynamicObject) new CloneUtils(true, true).clone(wmq_xiaodu_plan);
+
                 int version = (int) this.getModel().getValue("wmq_version") + 1;
                 clone.set("wmq_version", version); // 更新：版本号 + 1
                 clone.set("wmq_versionstatus", "A");//新方案的版本状态为最新版本
 
-
-               OperationResult saveOperate = SaveServiceHelper.saveOperate("wmq_xiaodu_plan", new DynamicObject[]{clone}, OperateOption.create());
-
-                //SaveServiceHelper.save(new DynamicObject[]{clone});
-//                if (saveOperate.isSuccess()) {
-//                    wmq_xiaodu_plan.set("wmq_versionstatus", "B");
-//                    SaveServiceHelper.update(wmq_xiaodu_plan);
-//                }
+                //直接保存，不校验 （save与saveOperate的区别）
+                //SaveServiceHelper.save(new DynamicObject[]{clone}, OperateOption.create());
+                OperationResult saveOperate = SaveServiceHelper.saveOperate("wmq_xiaodu_plan", new DynamicObject[]{clone}, OperateOption.create());
+                if (saveOperate.isSuccess()) {
+                    wmq_xiaodu_plan.set("wmq_versionstatus", "B");
+                    SaveServiceHelper.update(wmq_xiaodu_plan);
+                }else {
+                    this.getView().showErrorNotification(saveOperate.getMessage());
+                }
+                //终止操作代码
+                args.setCancel(true);
             }
         }
     }
 
+    /**
+     * @param evt 插件可以在此事件，设置基础资料列表过滤条件，或者打开其他资料选择界面。
+                  用户点击基础资料字段，打开基础资料选择列表界面前，触发此事件。
+     */
     @Override
     public void beforeF7Select(BeforeF7SelectEvent evt) {
         String fieldKey = evt.getProperty().getName();

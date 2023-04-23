@@ -35,7 +35,7 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
     }
 
     @Override
-    public void afterBindData(EventObject e) {
+    public void afterCreateNewData(EventObject e) {
         //自动带出申请人所在公司
         super.afterBindData(e);
 
@@ -57,8 +57,8 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
      * @param e
      */
     @Override
-    public void beforeBindData(EventObject e) {
-        super.beforeBindData(e);
+    public void afterBindData(EventObject e) {
+        super.afterBindData(e);
         Object billstatus = this.getModel().getValue("billstatus");
         HashMap<String, Object> fieldMap = new HashMap<>();
         if ("A".equals(billstatus)) {

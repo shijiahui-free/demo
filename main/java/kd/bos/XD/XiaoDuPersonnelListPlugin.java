@@ -107,6 +107,11 @@ public class XiaoDuPersonnelListPlugin extends AbstractListPlugin {
     public void listRowClick(ListRowClickEvent evt) {
         super.listRowClick(evt);
         ListSelectedRowCollection selectedRows = getSelectedRows();
+        if (selectedRows.size() <= 0) {
+            this.getView().setEnable(false, "wmq_start_xd");
+            return;
+        }
+
         ListSelectedRow selectRow = selectedRows.get(0);
 
         this.getView().setEnable("C".equals(selectRow.getBillStatus()), "wmq_start_xd");

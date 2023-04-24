@@ -1,30 +1,27 @@
 package kd.bos.XDdemo;
 
-import java.util.*;
-
 import com.aliyun.odps.utils.StringUtils;
 import kd.bos.dataentity.OperateOption;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.entity.datamodel.ITreeModel;
 import kd.bos.entity.datamodel.ListSelectedRow;
 import kd.bos.entity.datamodel.ListSelectedRowCollection;
 import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.form.CloseCallBack;
 import kd.bos.form.FormShowParameter;
 import kd.bos.form.ShowType;
-import kd.bos.form.control.Button;
 import kd.bos.form.control.events.ItemClickEvent;
 import kd.bos.form.events.AfterDoOperationEventArgs;
 import kd.bos.form.events.ClosedCallBackEvent;
 import kd.bos.form.plugin.AbstractFormPlugin;
 import kd.bos.list.BillList;
 import kd.bos.list.IListView;
-import kd.bos.orm.query.QCP;
-import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.OperationServiceHelper;
-import kd.scmc.pm.consts.QuotaOrderConst;
+
+import java.util.EventObject;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 消毒方案
@@ -117,7 +114,7 @@ public class XdSchemeListPlugin extends AbstractFormPlugin {
 
     @Override
     public void itemClick(ItemClickEvent evt) {
-    	//点击消毒方案列表上面的分配组织按钮
+        //点击消毒方案列表上面的分配组织按钮
 
         String key = evt.getItemKey();
         if ("rt00_bar_asign_org".equals(key)) {

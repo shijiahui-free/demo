@@ -8,7 +8,6 @@ import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.form.ClientActions;
 import kd.bos.form.IClientViewProxy;
 import kd.bos.form.control.EntryGrid;
-import kd.bos.form.control.events.BeforeItemClickEvent;
 import kd.bos.form.events.BeforeDoOperationEventArgs;
 import kd.bos.form.field.BasedataEdit;
 import kd.bos.form.field.events.BeforeF7SelectEvent;

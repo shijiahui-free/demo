@@ -2,12 +2,12 @@ package kd.bos.XD;
 
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
-import kd.bos.db.DB;
 import kd.bos.entity.BillEntityType;
 import kd.bos.entity.ExtendedDataEntity;
 import kd.bos.entity.ExtendedDataEntitySet;
 import kd.bos.entity.botp.plugin.AbstractConvertPlugIn;
 import kd.bos.entity.botp.plugin.args.AfterConvertEventArgs;
+import kd.bos.orm.ORM;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.AttachmentServiceHelper;
@@ -55,42 +55,43 @@ public class XiaoduPersonToNotes extends AbstractConvertPlugIn {
             //查询消毒方案
             QFilter qFilter = new QFilter("useorg,id", QCP.equals, chejianId);
             DynamicObject wmq_xiaodu_plans = BusinessDataServiceHelper.loadSingle("wmq_xiaodu_plan", "id,number,name", qFilter.toArray());
-            DynamicObject rtdl_ds = BusinessDataServiceHelper.loadSingle(wmq_xiaodu_plans.getPkValue(), "wmq_xiaodu_plan");
+            DynamicObject plan = BusinessDataServiceHelper.loadSingle(wmq_xiaodu_plans.getPkValue(), "wmq_xiaodu_plan");
             //设置消毒方案到消毒记录单中
-            xiaoDuNote.set("wmq_xiaodu_plan", rtdl_ds);
+            //xiaoDuNote.set("wmq_xiaodu_plan", plan);
 
-            if (rtdl_ds != null) {
+            if (plan != null) {
                 //wmq_leveentry  消毒方案--消毒等级分录
-                DynamicObjectCollection xdLevelRows = rtdl_ds.getDynamicObjectCollection("wmq_leveentry");
+                DynamicObjectCollection xdLevelRows = plan.getDynamicObjectCollection("wmq_leveentry");
 
-                //消毒记录单的分录--》wmq_step_entryentity
+                //消毒记录单的步骤分录--》wmq_step_entryentity
                 DynamicObjectCollection rdEntity = xiaoDuNote.getDynamicObjectCollection("wmq_step_entryentity");
                 rdEntity.clear();
                 int counter = 0;
 
-                for (DynamicObject xdLevelRow : xdLevelRows) {
-                    //wmq_xdlevel  消毒等级
-                    DynamicObject rtdl_fl_level = xdLevelRow.getDynamicObject("wmq_xdlevel");
-                    DynamicObjectCollection stepRows = rtdl_ds.getDynamicObjectCollection("wmq_stepentry");
-                    for (DynamicObject stepRow : stepRows) {
-                        // 消毒记录单分录--创建行实例
-                        DynamicObject obj = (DynamicObject) rdEntity.getDynamicObjectType().createInstance();
-                        // 设置消毒等级
-                        obj.set("wmq_xiaodulevel", rtdl_fl_level);
-                        // 设置消毒步骤
-                        DynamicObject step = stepRow.getDynamicObject("wmq_xdstep");
-                        obj.set("wmq_xiaodustep", step);
+                DynamicObjectCollection stepRows = plan.getDynamicObjectCollection("wmq_stepentry");
+                for (DynamicObject stepRow : stepRows) {
+                    // 消毒记录单分录--创建行实例
+                    DynamicObject obj = (DynamicObject) rdEntity.getDynamicObjectType().createInstance();
 
-                        // 设置消毒状态
-                        if (counter == 0) {
-                            obj.set("wmq_xiaodustatus", "B");  //B 进行中
-                        } else {
-                            obj.set("wmq_xiaodustatus", "A");  //A 未进行
-                        }
-                        counter = counter + 1;
-                        rdEntity.add(obj);
+                    // 设置消毒步骤
+                    DynamicObject step = stepRow.getDynamicObject("wmq_xdstep");
+                    obj.set("wmq_xiaodustep", step);
+                    // 设置消毒等级
+                    ORM orm = ORM.create();
+                    QFilter[] filters = new QFilter[]{new QFilter("id", QCP.equals, step.getPkValue())};
+                    DynamicObject dynamicObject = orm.queryOne("wmq_xiaodu_step", filters);
+                    obj.set("wmq_xiaodulevel", dynamicObject.getDynamicObject("wmq_xdlevel"));
+
+                    // 设置消毒状态
+                    if (counter == 0) {
+                        obj.set("wmq_xiaodustatus", "B");  //B 进行中
+                    } else {
+                        obj.set("wmq_xiaodustatus", "A");  //A 未进行
                     }
+                    counter = counter + 1;
+                    rdEntity.add(obj);
                 }
+
 
                 //上游附件下推携带到下游附件
                 List<DynamicObject> convertSource = (List<DynamicObject>) extendedDataEntity.getValue("ConvertSource");

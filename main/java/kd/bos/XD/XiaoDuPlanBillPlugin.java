@@ -75,6 +75,15 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
                 .invokeControlMethod(clientViewProxy, entryGrid.getKey());
     }
 
+    /**
+     * 1 事件介绍
+     * 插件可以在此事件，根据各字段值数据，重新设置控件、字段的可用、可见性等。
+     * 不要在此事件，修改字段值。
+     * 请参阅beforeBindData事件说明，了解本事件与beforeBindData事件的区别。
+     * <p>
+     * 2 事件触发时机
+     * 界面数据包构建完毕，生成指令，刷新前端字段值、控件状态之后，触发此事件。
+     */
     @Override
     public void afterBindData(EventObject e) {
         super.afterBindData(e);
@@ -93,6 +102,16 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
     }
 
 
+    /**
+     * @param args 1 事件介绍
+     *             插件可以在此事件：
+     *             提示确认消息；
+     *             校验数据，取消操作的执行；
+     *             传递给自定义操作参数给操作服务、操作插件。
+     *             <p>
+     *             2 事件触发时机
+     *             用户点击按钮、菜单，执行绑定的操作逻辑前，触发此事件；
+     */
     @Override
     public void beforeDoOperation(BeforeDoOperationEventArgs args) {
         super.beforeDoOperation(args);

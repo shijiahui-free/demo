@@ -49,7 +49,13 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
     }
 
     /**
-     * 插件修改元数据
+     * 1 事件介绍
+     * 插件可以在此事件，根据各字段值数据，重新设置控件、字段的可用、可见性等。
+     * 不要在此事件，修改字段值。
+     * 请参阅beforeBindData事件说明，了解本事件与beforeBindData事件的区别。
+     * <p>
+     * 2 事件触发时机
+     * 界面数据包构建完毕，生成指令，刷新前端字段值、控件状态之后，触发此事件。
      *
      * @param e
      */

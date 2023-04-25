@@ -46,10 +46,10 @@ public class XiaoDuPersonnelListPlugin extends AbstractListPlugin {
     public void beforeItemClick(BeforeItemClickEvent evt) {
         super.beforeItemClick(evt);
 
-        if (StringUtils.equals("wmq_start_xd", evt.getItemKey())) {
+        if (StringUtils.equals("wmq_start_xd", evt.getItemKey())) {//wmq_start_xd--开始消毒按钮标识
             ListSelectedRowCollection selectedRows = getSelectedRows();
             ListSelectedRow selectRow = selectedRows.get(0);
-            DynamicObject applyObject = BusinessDataServiceHelper.loadSingle(selectRow.getPrimaryKeyValue(), "wmq_personnel");
+            DynamicObject applyObject = BusinessDataServiceHelper.loadSingle(selectRow.getPrimaryKeyValue(), "wmq_personnel"); //wmq_personnel--人员申请单据标识
 
 
             // 1.选中已审核的申请单时，按钮才可点击，否则按钮不可用；

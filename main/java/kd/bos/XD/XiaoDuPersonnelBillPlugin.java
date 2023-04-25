@@ -97,7 +97,7 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
 
         switch (name) {
             case "wmq_applytoworkshop":
-                DynamicObject queryOne = QueryServiceHelper.queryOne("wmq_xiaodu_plan", "id", new QFilter[]{qFilter});
+                DynamicObject queryOne = QueryServiceHelper.queryOne("wmq_xiaodu_plan", "id", new QFilter[]{qFilter}); //wmq_xiaodu_plan--消毒方案单据标识
                 if (queryOne == null) {
                     this.getView().showTipNotification("该车间没有消毒方案,请重新选择");
                     this.getModel().setValue("wmq_applytoworkshop", null);

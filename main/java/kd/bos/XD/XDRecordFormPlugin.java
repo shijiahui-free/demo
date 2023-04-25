@@ -100,14 +100,14 @@ public class XDRecordFormPlugin extends AbstractFormPlugin implements WizardStep
     @Override
     public void update(StepEvent paramStepEvent) {
         int stepInt = paramStepEvent.getValue();
-        this.getView().setVisible(true, "wmq_buttonap");
+        this.getView().setVisible(true, "wmq_buttonap"); //wmq_buttonap --完成按钮名称
         String currentstep = this.getPageCache().get("currentstep");
         if (currentstep != null) {
             this.getView().setVisible(currentstep.equals(String.valueOf(stepInt)), "wmq_buttonap");
         } else {
             this.getView().setVisible(false, "wmq_buttonap");
-        }
-        this.getModel().setValue("wmq_picturefield", this.getModel().getValue("wmq_xiaoduphoto", stepInt));
+        }//wmq_xiaoduphoto--步骤分录的消毒照片字段
+        this.getModel().setValue("wmq_picturefield", this.getModel().getValue("wmq_xiaoduphoto", stepInt));  //wmq_picturefield--图片字段1
     }
 
     /**

@@ -50,15 +50,15 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
         super.afterCreateNewData(e);
         ORM orm = ORM.create();
         QFilter[] filters = new QFilter[]{new QFilter("status", QCP.equals, "C")};
-        List<DynamicObject> materialList = orm.query("wmq_xiaodu_level", filters);
+        List<DynamicObject> materialList = orm.query("wmq_xiaodu_level", filters);  //wmq_xiaodu_level--消毒等级单据标识
         if (materialList.size() <= 0) {
             return;
         }
         // 设置分录的行数为多少
-        this.getModel().batchCreateNewEntryRow("wmq_leveentry", materialList.size() - 1);
+        this.getModel().batchCreateNewEntryRow("wmq_leveentry", materialList.size() - 1);  //wmq_leveentry--消毒方案等级分录标识
         // 循环所有可用的等级基础资料
         for (int i = 0; i < materialList.size(); i++) {
-            this.getModel().setValue("wmq_xdlevel", materialList.get(i).get("id"), i);
+            this.getModel().setValue("wmq_xdlevel", materialList.get(i).get("id"), i); //wmq_xdlevel--消毒方案等级分录消毒等级字段
         }
 
         //设置不同的分录行的颜色
@@ -118,10 +118,10 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
         FormOperate formOperate = (FormOperate) args.getSource();
 
         // 单据列表工具栏："发布"按钮
-        if ("save".equals(formOperate.getOperateKey())) {
+        if ("save".equals(formOperate.getOperateKey())) {   //save--按钮操作代码
             // 1.新增时首次发布，发布后版本状态为最新版本，版本号为1
             // 2.再次修改发布时，最新版本的方案才能发布；
-            Object versionstatus = this.getModel().getValue("wmq_versionstatus");
+            Object versionstatus = this.getModel().getValue("wmq_versionstatus");  //wmq_versionstatus--消毒方案版本状态字段
             if ("B".equals(versionstatus)) {
                 this.getView().showTipNotification("最新版本的消毒方案才能修改消毒步骤和发布");
                 args.setCancel(true);
@@ -131,14 +131,15 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
             // 如果消毒方案没有被消毒记录单引用过，则保存修改，
             // 如果已经产生过消毒记录单，则发布后另存为一个新方案，版本状态为最新版本，版本号+1，旧方案版本状态为历史版本。
             List<QFilter> searchFilterList = new ArrayList<>();
-            searchFilterList.add(new QFilter("wmq_xiaodu_plan.number", QCP.equals, this.getModel().getValue("number")));
+            searchFilterList.add(new QFilter("wmq_xiaodu_plan.number", QCP.equals, this.getModel().getValue("number")));  //number--方案编号字段
+            //wmq_xiaodu_notes--消毒记录单据标识
             DynamicObject dots = BusinessDataServiceHelper.loadSingle("wmq_xiaodu_notes", "id, billno", searchFilterList.toArray(new QFilter[]{}));
             if (dots != null) {
                 DynamicObject wmq_xiaodu_plan = this.getModel().getDataEntity(true);
                 //克隆新对象
                 DynamicObject clone = (DynamicObject) new CloneUtils(true, true).clone(wmq_xiaodu_plan);
 
-                int version = (int) this.getModel().getValue("wmq_version") + 1;
+                int version = (int) this.getModel().getValue("wmq_version") + 1;  //wmq_version--版本号字段
                 clone.set("wmq_version", version); // 更新：版本号 + 1
                 clone.set("wmq_versionstatus", "A");//新方案的版本状态为最新版本
 
@@ -163,13 +164,12 @@ public class XiaoDuPlanBillPlugin extends AbstractBillPlugIn implements BeforeF7
     @Override
     public void beforeF7Select(BeforeF7SelectEvent evt) {
         String fieldKey = evt.getProperty().getName();
-        if (StringUtils.equals(fieldKey, "wmq_xdstep")) { // 选择步骤时
-            // 获取等级分录选中行  wmq_leveentry--分录标识
+        if (StringUtils.equals(fieldKey, "wmq_xdstep")) { // wmq_xdstep--步骤分录消毒步骤字段
+            // 获取等级分录选中行  wmq_leveentry--等级分录标识
             int index = this.getModel().getEntryCurrentRowIndex("wmq_leveentry");
             // 获取选中行中的消毒等级
             DynamicObject obj = (DynamicObject) this.getModel().getValue("wmq_xdlevel", index);
-            //wmq_xdlevel--分录中的消毒等级字段的标识
-            QFilter qFilter = new QFilter("wmq_xdlevel", QCP.equals, obj.getPkValue());
+            QFilter qFilter = new QFilter("wmq_xdlevel", QCP.equals, obj.getPkValue());//wmq_xdlevel--等级分录消毒等级字段标识
             ListShowParameter showParameter = (ListShowParameter) evt.getFormShowParameter();
             showParameter.getListFilterParameter().setFilter(qFilter);
         }

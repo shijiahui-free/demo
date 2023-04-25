@@ -42,8 +42,7 @@ public class XiaoDuPlanListPlugin extends AbstractFormPlugin {
     @Override
     public void itemClick(ItemClickEvent evt) {
         super.itemClick(evt);
-        //点击消毒方案列表上面的分配组织按钮  wmq_baritemap
-        //分配组织 rtdl_disorg
+        //点击消毒方案列表上面的分配组织按钮  wmq_baritemap标识
         if ("wmq_baritemap".equals(evt.getItemKey())) {
             //获取选中的数据
             IListView listview = (IListView) this.getView();
@@ -98,10 +97,10 @@ public class XiaoDuPlanListPlugin extends AbstractFormPlugin {
             DynamicObject scheme = BusinessDataServiceHelper.loadSingle(id, XDFA);
 
 
-            DynamicObjectCollection orgEntity = (DynamicObjectCollection) scheme.get("wmq_org_entry");
+            DynamicObjectCollection orgEntity = (DynamicObjectCollection) scheme.get("wmq_org_entry"); //wmq_org_entry--组织分录标识
             orgEntity.clear();
             DynamicObject orgs = orgEntity.addNew();
-            orgs.set("wmq_orgfield", orgpk);
+            orgs.set("wmq_orgfield", orgpk);  //wmq_orgfield--组织分录组织字段
             scheme.set("wmq_org_entry", orgEntity);
 
             OperationResult operationResult = OperationServiceHelper.executeOperate("save", XDFA, new DynamicObject[]{scheme}, OperateOption.create());

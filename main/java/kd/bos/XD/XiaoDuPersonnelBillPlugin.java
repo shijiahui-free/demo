@@ -34,7 +34,7 @@ public class XiaoDuPersonnelBillPlugin extends AbstractFormPlugin implements IFo
     @Override
     public void afterCreateNewData(EventObject e) {
         //自动带出申请人所在公司
-        super.afterBindData(e);
+        super.afterCreateNewData(e);
 
         DynamicObject wmq_company = (DynamicObject) this.getView().getModel().getValue("wmq_company");
         if (wmq_company != null) {

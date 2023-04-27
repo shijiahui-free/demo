@@ -35,7 +35,7 @@ public class DebugServer {
 		
 		System.setProperty("db.sql.out", "false");
 		//设置登录界面类型？
-		System.setProperty("login.type", "STANDALONE");
+		//System.setProperty("login.type", "STANDALONE");
 
 		System.setProperty("JETTY_WEB_PORT","8080");
 		System.setProperty("JETTY_WEBAPP_PATH", "../../../mservice-cosmic/webapp");

@@ -77,8 +77,6 @@ public class LeaveApplyBillPlugin extends AbstractBillPlugIn implements ICloseCa
             }
         }
         this.getModel().setValue("wmq_canapplyday", days, 0);
-
-
     }
 
     @Override

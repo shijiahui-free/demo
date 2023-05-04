@@ -27,7 +27,7 @@ public class DebugServer {
 	    System.setProperty("dubbo.consumer.url", "dubbo://localhost:28888");
 	    System.setProperty("dubbo.consumer.url.qing", "dubbo://localhost:30880");
 	    System.setProperty("dubbo.registry.register", "true");
-		//System.setProperty("mq.debug.queue.tag", "whb1133");
+		System.setProperty("mq.debug.queue.tag", "shijiahui");
 		System.setProperty("dubbo.service.lookup.local", "true");
 	    System.setProperty("appSplit", "false");
 
@@ -51,6 +51,8 @@ public class DebugServer {
 		System.setProperty("mc.server.url","http://127.0.0.1:8090/");
 		JettyServer.main(null);
 
+		//连接服务器的zk
+		System.setProperty("Schedule.zk.server","10.122.101.92:2181");
 
 
 	}

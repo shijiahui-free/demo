@@ -71,15 +71,15 @@ public class BzFromPlugin extends AbstractBillPlugIn implements HyperLinkClickLi
             //报账金额 wmq_bz_balance <= wmq_can_balance 可报金额
             int entryentity = this.getModel().getEntryCurrentRowIndex("entryentity");
 
-            Object wmq_bz_balance = this.getModel().getValue("wmq_bz_balance", entryentity);
+            Object wmq_bz_balance = this.getModel().getValue("wmq_bz_balance", 0);
             Object wmq_can_balance = this.getModel().getValue("wmq_can_balance", entryentity);
 
             BigDecimal bigDecimal = new BigDecimal(wmq_bz_balance.toString());
             BigDecimal bigDecimal2 = new BigDecimal(wmq_can_balance.toString());
 
             if (bigDecimal.compareTo(bigDecimal2) > 0) {
-                this.getView().showErrorNotification("报账金额 wmq_bz_balance <= wmq_can_balance 可报金额");
                 this.getModel().setValue("wmq_bz_balance", 0, entryentity);
+                this.getView().showErrorNotification("报账金额 wmq_bz_balance <= wmq_can_balance 可报金额");
             }
         }
     }

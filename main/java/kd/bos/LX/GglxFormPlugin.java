@@ -9,6 +9,8 @@ import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.entity.datamodel.IDataModel;
 import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.form.IPageCache;
+import kd.bos.form.control.Control;
+import kd.bos.form.control.EntryGrid;
 import kd.bos.form.control.events.ItemClickEvent;
 import kd.bos.form.field.BasedataEdit;
 import kd.bos.form.field.events.BeforeF7SelectEvent;
@@ -92,6 +94,42 @@ public class GglxFormPlugin extends AbstractBillPlugIn implements BeforeF7Select
                 dynamicObject.set("wmq_billnoson", billsub);
             }
             this.getView().updateView("entryentity");
+        } else if ("wmq_zero_clearing".equals(evt.getItemKey())) {
+            //获取单据体控件
+            EntryGrid entryGrid = this.getControl("entryentity");
+            //获取选中行，数组为行号，从0开始int[]
+            int[] selectRows = entryGrid.getSelectRows();
+            //获取单据体数据集合
+            DynamicObjectCollection entity = this.getModel().getEntryEntity("entryentity");
+            if (selectRows != null && selectRows.length > 0) {
+                for (int selectRow : selectRows) {
+                    //获取选中行的单据体数据
+                    DynamicObject dot = entity.get(selectRow);
+                    //wmq_lx_bill--广告立项单标识
+                    DynamicObject data = BusinessDataServiceHelper.newDynamicObject("wmq_lx_bill");
+                    //为新增单据头赋值
+                    data.set("billstatus","C");
+                    data.set("wmq_lx_date",this.getModel().getValue("wmq_lx_date"));
+                    data.set("wmq_userfield",this.getModel().getValue("wmq_userfield"));
+                    data.set("wmq_company",this.getModel().getValue("wmq_company"));
+                    data.set("org",this.getModel().getValue("org"));
+                    data.set("pvdo_lxtype","0");
+                    //为新增分录赋值  TODO 标识修改
+                    DynamicObjectCollection entryentity = data.getDynamicObjectCollection("entryentity"); //
+                    DynamicObject entry = new DynamicObject(entryentity.getDynamicObjectType());
+                    entry.set("pvdo_lxbillno_son",dot.get("pvdo_lxbillno_son"));
+                    entry.set("pvdo_deliverymethod",dot.get("pvdo_deliverymethod"));
+                    entry.set("pvdo_advertisers",dot.get("pvdo_advertisers"));
+                    entry.set("pvdo_product",dot.get("pvdo_product"));
+                    entry.set("pvdo_applyamount",dot.get("pvdo_applyamount"));
+                    entry.set("pvdo_approvedamount",dot.get("pvdo_approvedamount"));
+                    entry.set("pvdo_availablebalance",dot.get("pvdo_availablebalance"));
+                    entry.set("pvdo_amountquoted",dot.get("pvdo_amountquoted"));
+                    entry.set("pvdo_status",dot.get("pvdo_status"));
+                    entryentity.add(entry);
+                }
+            }
+
         }
     }
 

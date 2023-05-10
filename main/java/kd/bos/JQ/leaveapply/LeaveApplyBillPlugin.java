@@ -2,12 +2,10 @@ package kd.bos.JQ.leaveapply;
 
 import kd.bos.bill.AbstractBillPlugIn;
 import kd.bos.dataentity.entity.DynamicObject;
-import kd.bos.dataentity.utils.StringUtils;
 import kd.bos.entity.datamodel.events.PropertyChangedArgs;
+import kd.bos.entity.plugin.support.util.Assert;
 import kd.bos.form.ClientProperties;
 import kd.bos.form.ICloseCallBack;
-import kd.bos.form.control.Control;
-import kd.bos.form.control.events.BeforeClickEvent;
 import kd.bos.form.control.events.BeforeItemClickEvent;
 import kd.bos.form.control.events.ItemClickEvent;
 import kd.bos.form.field.DateRangeEdit;
@@ -15,11 +13,8 @@ import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
-import kd.bos.servicehelper.org.OrgUnitServiceHelper;
 import kd.bos.servicehelper.user.UserServiceHelper;
 
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
